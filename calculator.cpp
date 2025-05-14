@@ -65,7 +65,7 @@ void trigonometri(){
     }
 int main(){
     float a, b, result;
-    char choice;
+    char choice;//choice
     do {
         int n;
         cout << "\n1. Basic calculator\n";
