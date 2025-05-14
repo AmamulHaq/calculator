@@ -6,7 +6,9 @@ int add(float a, float b){
 int sub(float a,float b){
     return a-b;}
 int multi(float a,float b){
-    return a*b;
+    return a*b;}
+int div(float a,float b){
+    return a/b;
 }
 int main(){
     float a=4, b=2; 
