@@ -1,20 +1,25 @@
 #include<iostream>
 using namespace std;
 
-int add(float a, float b){
+float add(float a, float b){
     return a+b;}
-int sub(float a,float b){
+float sub(float a,float b){
     return a-b;}
-int multi(float a,float b){
+float multi(float a,float b){
     return a*b;}
-int div(float a,float b){
+float div(float a,float b){
     return a/b;
 }
 int main(){
-    float a=4, b=2; 
-    int result;
-    result=add(a,b);
-    result=sub(a,b);
-    result=multi(a,b);
-    result=div(a,b);
+    float a, b, result;
+
+    cout<<"Enter any two number: "<<endl;
+    cin>>a>>b;
+    cout<<"add: "<<add(a,b)<<endl;
+    cout<<"sub: "<<sub(a,b)<<endl;
+    cout<<"multi: "<<multi(a,b)<<endl;
+    cout<<"div: "<<div(a,b)<<endl;
+    
+
+    return 0;
 }
