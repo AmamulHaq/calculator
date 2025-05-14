@@ -56,8 +56,10 @@ void trigonometri(){
                 break;
         case 5: if (cos(x) != 0){
                 cout << "sec(x): " << 1 / cos(x) << endl;}
+                break;
         case 6: if (tan(x) != 0){
-                cout << "cot(x): " << 1 / tan(x) << endl;}       
+                cout << "cot(x): " << 1 / tan(x) << endl;}
+                break;       
         default:
                 cout << "Invalid selection\n";
     }
