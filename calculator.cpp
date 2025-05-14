@@ -1,9 +1,13 @@
 #include<iostream>
 using namespace std;
+
 int add(float a, float b){
     return a+b;}
 int sub(float a,float b){
     return a-b;}
+int multi(float a,float b){
+    return a*b;
+}
 int main(){
     float a=4, b=2; 
     int result;
