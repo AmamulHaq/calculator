@@ -6,5 +6,5 @@ int main(){
     result=add(a,b);
     result=sub(a,b);
     result=multi(a,b);
-    result=divide(a,b);
+    result=div(a,b);
 }
