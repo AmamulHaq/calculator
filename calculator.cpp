@@ -176,6 +176,178 @@ void trigonometri(){
     }
 
     }
+
+void twoMatrices(int &m, int &n, int &p, int &q, int **&M, int **&N) {
+    cout << "Enter order of matrix M (rows columns): \n";
+    cin >> m >> n;
+    
+    // Allocate memory for matrix M
+    M = new int*[m];
+    for(int i = 0; i < m; i++) {
+        M[i] = new int[n];
+    }
+    
+    cout << "Enter elements of matrix M: \n";
+    for(int i = 0; i < m; i++) {
+        for(int j = 0; j < n; j++) {
+            cin >> M[i][j];
+        }
+    }
+    
+    cout << "Enter order of matrix N (rows columns): \n";
+    cin >> p >> q;
+    
+    // Allocate memory for matrix N
+    N = new int*[p];
+    for(int i = 0; i < p; i++) {
+        N[i] = new int[q];
+    }
+    
+    cout << "Enter elements of matrix N: \n";
+    for(int i = 0; i < p; i++) {
+        for(int j = 0; j < q; j++) {
+            cin >> N[i][j];
+        }
+    }
+}
+
+void addition() {
+    int m, n, p, q;
+    int **M, **N;
+    
+    twoMatrices(m, n, p, q, M, N);
+    
+    if (m != p || n != q) {
+        cout << "\nTheir sum is not possible\n";
+        return;
+    }
+    
+    cout << "\nSum of the matrices:\n";
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            cout << (M[i][j] + N[i][j]) << "\t";
+        }
+        cout << "\n";
+    }
+    
+    // Deallocate memory
+    for(int i = 0; i < m; i++) delete[] M[i];
+    delete[] M;
+    for(int i = 0; i < p; i++) delete[] N[i];
+    delete[] N;
+}
+void subtraction(){
+    int m, n, p, q;
+    int **M, **N;
+    
+    twoMatrices(m, n, p, q, M, N);
+    
+    if (m != p || n != q) {
+        cout << "\nTheir sum is not possible\n";
+        return;
+    }
+    
+    cout << "\nSum of the matrices:\n";
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            cout << (M[i][j] - N[i][j]) << "\t";
+        }
+        cout << "\n";
+    }
+    
+    // Deallocate memory
+    for(int i = 0; i < m; i++) delete[] M[i];
+    delete[] M;
+    for(int i = 0; i < p; i++) delete[] N[i];
+    delete[] N;   
+}
+
+void multiplication() {
+    int m, n, p, q;
+    int **M, **N;
+    
+    twoMatrices(m, n, p, q, M, N);
+    
+    if (n != p) {
+        cout << "\nMatrix multiplication not possible (columns of M must match rows of N)\n";
+        return;
+    }
+    
+    // Allocate result matrix (m × q)
+    int **C = new int*[m];
+    for(int i = 0; i < m; i++) {
+        C[i] = new int[q];
+    }
+    
+    // Initialize result matrix to 0
+    for(int i = 0; i < m; i++) {
+        for(int j = 0; j < q; j++) {
+            C[i][j] = 0;
+        }
+    }
+    
+    // Perform multiplication
+    for(int i = 0; i < m; i++) {
+        for(int j = 0; j < q; j++) {
+            for(int k = 0; k < n; k++) {
+                C[i][j] += M[i][k] * N[k][j];
+            }
+        }
+    }
+    
+    cout << "\nProduct of the matrices:\n";
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < q; j++) {
+            cout << C[i][j] << "\t";
+        }
+        cout << "\n";
+    }
+    
+    // Deallocate memory
+    for(int i = 0; i < m; i++) delete[] M[i];
+    delete[] M;
+    for(int i = 0; i < p; i++) delete[] N[i];
+    delete[] N;
+    for(int i = 0; i < m; i++) delete[] C[i];
+    delete[] C;
+}
+void oneMatrix(){
+    int m,n;
+    int a[m][n];
+    cout<<"Enter elements of matrix A: \n";
+    for(int i=0;i<m;i++){
+        for(int j=0;j<n;j++){
+            cin>>a[i][j];
+        }
+    }
+}
+void transpose(){
+    
+}
+void inverse(){
+    
+}
+void matrix(){
+    int n;
+    cout << "1.addition  |2.subtraction  |3.multiplication  |4. transpose |5.inverse\n";
+
+    cout<<"Select operation: ";
+    cin>>n;
+    switch (n) {
+        case 1: addition();
+                break;
+        case 2: subtraction();
+                break;
+        case 3: multiplication();
+                break;
+        case 4: transpose();
+                break;
+        case 5: inverse();
+                break;
+        default:
+                cout << "Invalid selection\n";
+    }
+}
 void truthtable(){
 int u, v;
     char g;
@@ -348,6 +520,7 @@ int main(){
                 break;
             case 4:
                 cout << "Matrix\n";
+                matrix();
                 break;
             case 5:
                 cout << "Truth table\n";
