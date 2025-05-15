@@ -12,6 +12,7 @@ int fact(int n) {
     }
     return fact;
 }
+//truth table
 void menu(int n, int u, int v);
 int AND(int u, int v);
 int OR(int u, int v);
