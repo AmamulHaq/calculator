@@ -150,21 +150,33 @@ int EX_NOR(int u, int v) {
 void basic(){
     float a,b;
     int n;
-    cout<<"Enter any two number: "<<endl;
-    cin>>a>>b;
-    cout << "1.add  |2.sub  |3.multi  |4.divide\n";
 
+    cout << "1.add  |2.sub  |3.multi  |4.divide  |5. a^b  |6. (b√a) b under root a \n";
     cout<<"Select operation: ";
     cin>>n;
+    cout<<"Enter any two number: "<<endl;
+    cin>>a>>b;
     switch (n) {
         case 0: return;
-        case 1: cout<<"add: "<<(a+b)<<endl;
+        case 1: cout << a << " + " << b << " = " << (a + b) << endl;
                 break;
-        case 2: cout<<"sub: "<<(a-b)<<endl;
+        case 2: cout << a << " - " << b << " = " << (a - b) << endl;
                 break;
-        case 3: cout<<"multi: "<<(a*b)<<endl;
+        case 3: cout << a << " × " << b << " = " << (a * b) << endl;
                 break;
-        case 4: cout<<"div: "<<(a/b)<<endl;
+        case 4: if (b != 0) {
+                cout << a << " ÷ " << b << " = " << (a / b) << endl;
+                } else {
+                cout << "Error: cannot divide by 0." << endl;
+                }
+                break;
+        case 5: cout << a << "^" << b << " = " << pow(a, b) << endl;
+                break;
+        case 6: if (a < 0) {
+                    cout << b << "√" << a << " = -" << pow(-a, 1.0/b) << endl;
+                } else {
+                    cout << b << "√" << a << " = " << pow(a, 1.0/b) << endl;
+                }
                 break;
         default:
                 cout << "Invalid selection\n";
@@ -609,7 +621,7 @@ void truthtable(){
 
     if (g == 'y' || g == 'Y') {
         displayMainMenu();
-        cout << "Select any operator to see its truth table (0 to exit): ";
+        cout << "Select operation for truth table (0 to exit): ";
         cin >> t;
 
         if (t == 1) {
@@ -630,6 +642,29 @@ void truthtable(){
     }
 }
 
+void other(){
+    float x;
+    int n;
+
+    cout << "1.e^x  |2.ln x  |3.log x  |4. √x square root of x\n";
+    cout<<"Select operation: ";
+    cin>>n;
+    cout<<"Enter any number: "<<endl;
+    cin>>x;
+    switch (n) {
+        case 0: return;
+        case 1: cout<<"e^x: "<<exp(x)<<endl;
+                break;
+        case 2: cout<<"ln x: "<<log(x)<<endl;
+                break;
+        case 3: cout<<"log x: "<<log10(x)<<endl;
+                break;
+        case 4: cout<<"√x square root: "<<sqrt(x)<<endl;
+                break;
+        default:
+                cout << "Invalid selection\n";
+    }
+}
 int main(){
     char choice;
     do {
@@ -665,6 +700,7 @@ int main(){
                 break;
             case 6:
                 cout << "Other calculator\n";
+                other();
                 break;
             default:
                 cout << "Invalid selection\n";
