@@ -1,6 +1,9 @@
 #include<iostream>
-#include<math.h>
-#include<string.h>
+#include<cmath>
+#include<cstring>
+#include <vector>
+#include <iomanip>
+#include <stdexcept>
 using namespace std;
 
 int fact(int n) {
@@ -12,7 +15,8 @@ int fact(int n) {
     }
     return fact;
 }
-//truth table
+
+// Truth table function declarations
 void menu(int n, int u, int v);
 int AND(int u, int v);
 int OR(int u, int v);
@@ -22,6 +26,25 @@ int NOT(int u, int v);
 int EX_OR(int u, int v);
 int EX_NOR(int u, int v);
 void TruthTable(const char* gateName, const char* rows[]);
+void displayMainMenu();
+
+// Matrix function declarations
+void addition();
+void subtraction();
+void multiplication();
+void determinantFunc();
+void transpose();
+void adj();
+void inverseFunc();
+void matrix();
+
+// Other function declarations
+void basic();
+void trigonometri();
+void truthtable();
+
+int m, n; // Global variables for matrix dimensions
+
 void displayMainMenu() {
     system("cls");
     cout << "0. Stop/Exit Truthtable\n";
@@ -33,12 +56,13 @@ void displayMainMenu() {
     cout << "6. Exclusive OR (EX_OR)\n";
     cout << "7. Exclusive NOR (EX_NOR)\n\n";
 }
+
 void TruthTable(const char* gateName, const char* rows[]) {
     cout << gateName << ") Truth Table:\n  A   |   B   |Output  \n --------------------\n";
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 4; i++) {
         cout << rows[i] << endl;
     }
-    cout << endl;
+    cout << rows[4] << endl << endl;
 }
 
 void menu(int n, int u, int v) {
@@ -54,7 +78,6 @@ void menu(int n, int u, int v) {
         default: cout << "Invalid choice! Please select a valid option (1 to 7).\n"; break;
     }
 }
-
 
 int AND(int u, int v) {
     if (u == 1 && v == 1) {
@@ -123,6 +146,7 @@ int EX_NOR(int u, int v) {
     }
     return 0;
 }
+
 void basic(){
     float a,b;
     int n;
@@ -146,6 +170,7 @@ void basic(){
                 cout << "Invalid selection\n";
     }
 }
+
 void trigonometri(){
     int n = 3;
     double x;
@@ -174,8 +199,7 @@ void trigonometri(){
         default:
                 cout << "Invalid selection\n";
     }
-
-    }
+}
 
 void twoMatrices(int &m, int &n, int &p, int &q, int **&M, int **&N) {
     cout << "Enter order of matrix M (rows columns): \n";
@@ -236,6 +260,7 @@ void addition() {
     for(int i = 0; i < p; i++) delete[] N[i];
     delete[] N;
 }
+
 void subtraction(){
     int m, n, p, q;
     int **M, **N;
@@ -243,11 +268,11 @@ void subtraction(){
     twoMatrices(m, n, p, q, M, N);
     
     if (m != p || n != q) {
-        cout << "\nTheir sum is not possible\n";
+        cout << "\nTheir subtraction is not possible\n";
         return;
     }
     
-    cout << "\nSum of the matrices:\n";
+    cout << "\nSubtraction of the matrices:\n";
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
             cout << (M[i][j] - N[i][j]) << "\t";
@@ -311,80 +336,184 @@ void multiplication() {
     for(int i = 0; i < m; i++) delete[] C[i];
     delete[] C;
 }
-void oneMatrix(){
-    int m,n;
-    int a[m][n];
-    cout<<"Enter elements of matrix A: \n";
-    for(int i=0;i<m;i++){
-        for(int j=0;j<n;j++){
-            cin>>a[i][j];
-        }
+// Global variables for matrix dimensions and data
+int mat_rows, mat_cols;  // Renamed from m, n to avoid conflicts
+vector<vector<float>> mat_data;  // Renamed from matrix to avoid conflicts
+
+// Print any matrix
+void printMatrix(const vector<vector<float>>& matrix) {
+    for (const auto& row : matrix) {
+        for (float val : row)
+            cout << fixed << setprecision(1) << val << "\t";
+        cout << endl;
     }
 }
-void transpose(){
-    
-}
-void inverse(){
-    
-}
-void matrix(){
-    int n;
-    cout << "1.addition  |2.subtraction  |3.multiplication  |4. transpose |5.inverse\n";
 
-    cout<<"Select operation: ";
-    cin>>n;
-    switch (n) {
+// Return a matrix after getting input
+vector<vector<float>> oneMatrix() {
+    cout << "Enter matrix dimensions (rows columns): ";
+    cin >> mat_rows >> mat_cols;
+    vector<vector<float>> matrix(mat_rows, vector<float>(mat_cols));
+    cout << "Enter matrix elements row-wise:" << endl;
+    for (int i = 0; i < mat_rows; ++i)
+        for (int j = 0; j < mat_cols; ++j)
+            cin >> matrix[i][j];
+
+    cout << "\nOriginal Matrix:\n";
+    printMatrix(matrix);
+    return matrix;
+}
+
+// Calculate determinant of a matrix
+float determinant(vector<vector<float>> matrix) {
+    int n = matrix.size();
+    if (n == 1) return matrix[0][0];
+
+    float det = 0;
+    for (int col = 0; col < n; ++col) {
+        vector<vector<float>> submatrix(n - 1, vector<float>(n - 1));
+        for (int i = 1; i < n; ++i) {
+            int sub_col = 0;
+            for (int j = 0; j < n; ++j) {
+                if (j == col) continue;
+                submatrix[i - 1][sub_col++] = matrix[i][j];
+            }
+        }
+        float minor = determinant(submatrix);
+        det += matrix[0][col] * minor * ((col % 2 == 0) ? 1 : -1);
+    }
+    return det;
+}
+
+void determinantFunc() {
+    mat_data = oneMatrix();
+    if (mat_rows == mat_cols) {
+        float det = determinant(mat_data);
+        cout << "\nDeterminant: " << det << endl;
+    } else {
+        cout << "\nDeterminant can only be calculated for square matrices.\n";
+    }
+}
+
+// Calculate transpose of a matrix
+vector<vector<float>> transposeMatrix(const vector<vector<float>>& matrix) {
+    if (matrix.empty()) return {};
+    int m = matrix.size(), n = matrix[0].size();
+    vector<vector<float>> transposed(n, vector<float>(m));
+    for (int i = 0; i < m; ++i)
+        for (int j = 0; j < n; ++j)
+            transposed[j][i] = matrix[i][j];
+    return transposed;
+}
+
+void transpose() {
+    mat_data = oneMatrix();
+    vector<vector<float>> transposed = transposeMatrix(mat_data);
+    cout << "\nTransposed Matrix:\n";
+    printMatrix(transposed);
+}
+
+// Calculate cofactor matrix
+vector<vector<float>> cofactor(const vector<vector<float>>& matrix) {
+    int n = matrix.size();
+    vector<vector<float>> cof(n, vector<float>(n));
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            vector<vector<float>> submatrix;
+            for (int k = 0; k < n; ++k) {
+                if (k == i) continue;
+                vector<float> row;
+                for (int l = 0; l < n; ++l) {
+                    if (l == j) continue;
+                    row.push_back(matrix[k][l]);
+                }
+                submatrix.push_back(row);
+            }
+            float minor = determinant(submatrix);
+            cof[i][j] = minor * (((i + j) % 2 == 0) ? 1 : -1);
+        }
+    }
+    return cof;
+}
+
+// Calculate adjugate matrix
+vector<vector<float>> adjugate(const vector<vector<float>>& matrix) {
+    return transposeMatrix(cofactor(matrix));
+}
+
+void adj() {
+    mat_data = oneMatrix();
+    if (mat_rows != mat_cols) {
+        cout << "\nAdjugate can only be calculated for square matrices.\n";
+        return;
+    }
+    vector<vector<float>> cof = cofactor(mat_data);
+    cout << "\nCofactor Matrix:\n";
+    printMatrix(cof);
+    vector<vector<float>> adj = adjugate(mat_data);
+    cout << "\nAdjugate Matrix:\n";
+    printMatrix(adj);
+}
+
+// Calculate inverse matrix
+vector<vector<float>> inverse(const vector<vector<float>>& matrix) {
+    float det = determinant(matrix);
+    if (det == 0) throw runtime_error("Matrix is singular and cannot be inverted.");
+    vector<vector<float>> adj = adjugate(matrix);
+    int n = matrix.size();
+    vector<vector<float>> inv(n, vector<float>(n));
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            inv[i][j] = adj[i][j] / det;
+    return inv;
+}
+
+void inverseFunc() {
+    mat_data = oneMatrix();
+    if (mat_rows != mat_cols) {
+        cout << "\nInverse can only be calculated for square matrices.\n";
+        return;
+    }
+    try {
+        vector<vector<float>> inv = inverse(mat_data);
+        cout << "\nInverse Matrix:\n";
+        printMatrix(inv);
+    } catch (const runtime_error& e) {
+        cout << "\nError: " << e.what() << endl;
+    }
+}
+
+
+void Matrix() {
+    int choice;
+    cout << "1.addition  |2.subtraction  |3.multiplication  |4.determinant |5.transpose |6.adjugate |7.inverse\n";
+    cout << "Select operation: ";
+    cin >> choice;
+    switch (choice) {
         case 1: addition();
                 break;
         case 2: subtraction();
                 break;
         case 3: multiplication();
                 break;
-        case 4: transpose();
+        case 4: determinantFunc();
                 break;
-        case 5: inverse();
+        case 5: transpose();
+                break;
+        case 6: adj();
+                break;
+        case 7: inverseFunc();
                 break;
         default:
                 cout << "Invalid selection\n";
     }
 }
+
 void truthtable(){
-int u, v;
+    int u, v;
     char g;
-    int n, t;
-
-again:
-    while (1) {
-        cout << "\t__--*****LOGICAL OPERATIONS*****--__" << endl;
-        displayMainMenu();
-        cout << "Select any operators: ";
-     
-        if (cin >> n) {
-            if (n==0){
-                return;
-            }
-            if (n >= 1 && n <= 7) {
-                break;
-            }
-        } else {
-            cout << "\nInvalid input! Please enter a valid operator (1 to 7).\n\n";
-            cin.clear();
-            while (cin.get() != '\n');
-        }
-    }
-
-    while (1) {
-        cout << "\n\tBINARY VALUES FOR TWO INPUTS A & B\n";
-        cout << "\nEnter '1' for true and '0' for false:\n\n";
-        cin >> u >> v;
-
-        if ((u == 1 || u == 0) && (v == 1 || v == 0)) {
-            break;
-        }
-        cout << "\nInvalid inputs! Please enter '1' for true and '0' for false.\n\n";
-    }
-
-    menu(n, u, v);
+    int choice, t;
 
     const char* andRows[] = {
         "  0   |   0   |   0   ",
@@ -442,65 +571,73 @@ again:
         " ___________________  "
     };
 
-    cout << "\n\n\t DO YOU WANT TO KNOW TRUTH TABLE of logic gates ?\n";
-    cout << "\nEnter 'y' for yes or continue for operations.....\n\n ";
-    cin >> g;
-
-    if (g == 'y') {
-        goto truth;
-    } else {
-        goto again;
-    }
-
-truth:
-
-    while (1) {
+    while (true) {
+        cout << "\t__--*****LOGICAL OPERATIONS*****--__" << endl;
         displayMainMenu();
-        cout << "Select any (0-7) of the operators (0 to exit): ";
-
-        if (cin >> n) {
-            if (n == 0) {  // Exit condition
-                return;     // Return to main menu
+        cout << "Select any operators (0 to exit): ";
+     
+        if (cin >> choice) {
+            if (choice == 0) {
+                return;
             }
-            if (n >= 1 && n <= 7) {
+            if (choice >= 1 && choice <= 7) {
                 break;
             }
         } else {
-            cout << "\nInvalid input! Please enter 0-7.\n\n";
+            cout << "\nInvalid input! Please enter a valid operator (1 to 7).\n\n";
             cin.clear();
             while (cin.get() != '\n');
         }
     }
 
-    if (t == 1) {
-        TruthTable("\nAND", andRows);
-    } else if (t == 2) {
-        TruthTable("\nOR", orRows);
-    } else if (t == 3) {
-        TruthTable("\nNAND", nandRows);
-    } else if (t == 4) {
-        TruthTable("\nNOR", norRows);
-    } else if (t == 5) {
-        TruthTable("\nNOT", notRows);
-    } else if (t == 6) {
-        TruthTable("\nEX-OR", xorRows);
-    } else if (t == 7) {
-        TruthTable("\nEX-NOR", xnorRows);
+    while (true) {
+        cout << "\n\tBINARY VALUES FOR TWO INPUTS A & B\n";
+        cout << "\nEnter '1' for true and '0' for false:\n\n";
+        cin >> u >> v;
+
+        if ((u == 1 || u == 0) && (v == 1 || v == 0)) {
+            break;
+        }
+        cout << "\nInvalid inputs! Please enter '1' for true and '0' for false.\n\n";
     }
 
-    goto again;
-    
+    menu(choice, u, v);
 
+    cout << "\n\n\tDO YOU WANT TO KNOW TRUTH TABLE of logic gates?\n";
+    cout << "\nEnter 'y' for yes or any other key to continue...\n";
+    cin >> g;
+
+    if (g == 'y' || g == 'Y') {
+        displayMainMenu();
+        cout << "Select any operator to see its truth table (0 to exit): ";
+        cin >> t;
+
+        if (t == 1) {
+            TruthTable("\nAND", andRows);
+        } else if (t == 2) {
+            TruthTable("\nOR", orRows);
+        } else if (t == 3) {
+            TruthTable("\nNAND", nandRows);
+        } else if (t == 4) {
+            TruthTable("\nNOR", norRows);
+        } else if (t == 5) {
+            TruthTable("\nNOT", notRows);
+        } else if (t == 6) {
+            TruthTable("\nEX-OR", xorRows);
+        } else if (t == 7) {
+            TruthTable("\nEX-NOR", xnorRows);
+        }
+    }
 }
+
 int main(){
-    float a, b, result;
-    char choice;//choice
+    char choice;
     do {
         int n;
         cout << "\n1. Basic calculator\n";
-        cout << "2. Trigonometric \n";
-        cout << "3. Advanced \n";
-        cout << "4. Matrix \n";
+        cout << "2. Trigonometric\n";
+        cout << "3. Advanced\n";
+        cout << "4. Matrix\n";
         cout << "5. Truth table\n";
         cout << "6. Other\n";
         cout << "Select calculator type: ";
@@ -520,7 +657,7 @@ int main(){
                 break;
             case 4:
                 cout << "Matrix\n";
-                matrix();
+                Matrix();
                 break;
             case 5:
                 cout << "Truth table\n";
@@ -538,6 +675,5 @@ int main(){
 
     } while (choice == 'y' || choice == 'Y');
 
-    
     return 0;
 }
