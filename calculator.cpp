@@ -15,7 +15,13 @@ int fact(int n) {
     }
     return fact;
 }
-
+int permu(int a, int b) {
+    return fact(a) / fact(a - b);
+}
+// Function to calculate aCb
+int combi(int a, int b) {
+    return fact(a) / (fact(b) * fact(a - b));
+}
 // Truth table function declarations
 void menu(int n, int u, int v);
 int AND(int u, int v);
@@ -151,7 +157,7 @@ void basic(){
     float a,b;
     int n;
 
-    cout << "1.add  |2.sub  |3.multi  |4.divide  |5. a^b  |6. (b√a) b under root a \n";
+    cout << "1.add  |2.sub  |3.multi  |4.divide  |5. a^b  |6. (b√a) |7.permutation (a,b) |8.combination (a,b) \n";
     cout<<"Select operation: ";
     cin>>n;
     cout<<"Enter any two number: "<<endl;
@@ -178,6 +184,19 @@ void basic(){
                     cout << b << "√" << a << " = " << pow(a, 1.0/b) << endl;
                 }
                 break;
+        case 7: if(a < 0 || b < 0 || b > a) {
+                cout << "Invalid input. Make sure 0 <= b <= a.\n";
+                } else {
+                cout << "permutation (aPb): " << permu(a, b) << endl;
+                }
+                break;
+        case 8: if(a < 0 || b < 0 || b > a) {
+                cout << "Invalid input. Make sure 0 <= b <= a.\n";
+                } else {
+                cout << "combination (aCb): " << combi(a, b) << endl;
+                }
+                break;
+
         default:
                 cout << "Invalid selection\n";
     }
