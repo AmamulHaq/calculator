@@ -37,10 +37,11 @@ vector<Token> tokenize(const string& expr) {
             string op = (expr[i] == '-') ? "u-" : "u+";
             tokens.emplace_back(op, true, false, false);
             ++i;
+            expectUnary = false;
             continue;
         }
 
-        if (isdigit(expr[i])) {
+        if (isdigit(expr[i]) || (expr[i] == '.' && i + 1 < expr.size() && isdigit(expr[i+1]))) {
             current += expr[i++];
             while (i < expr.size() && (isdigit(expr[i]) || expr[i] == '.')) {
                 current += expr[i++];
@@ -99,8 +100,7 @@ vector<Token> infixToPostfix(const vector<Token>& tokens) {
                 opStack.pop();
             }
             if (!opStack.empty()) opStack.pop();
-        } else {
-while (!opStack.empty() && opStack.top().value != "(" &&
+        } else {while (!opStack.empty() && opStack.top().value != "(" &&
        (precedence(opStack.top().value) > precedence(token.value) ||
        (precedence(opStack.top().value) == precedence(token.value) && 
         !isRightAssoc(token.value)))) {  // <-- added missing ')'
@@ -108,7 +108,6 @@ while (!opStack.empty() && opStack.top().value != "(" &&
     opStack.pop();
 }
 opStack.push(token);
-
         }
     }
 
@@ -125,11 +124,11 @@ string formatNumber(double num) {
     if (num == static_cast<int>(num)) {
         oss << static_cast<int>(num);
     } else {
-        oss.precision(3);
+        oss.precision(6);
         oss << fixed << num;
         string s = oss.str();
         size_t last = s.find_last_not_of('0') + 1;
-        if (s[last-1] == '.') last--;
+        if (last > 0 && s[last-1] == '.') last--;
         s.erase(last, string::npos);
         return s;
     }
@@ -564,6 +563,154 @@ void evaluatePostfixWithSteps(const vector<Token>& postfix, const map<char, doub
     cout << "Final Result: " << operands.top() << endl;
 }
 
+// Split expression into additive terms
+vector<vector<Token>> splitInfixTerms(const vector<Token>& tokens) {
+    vector<vector<Token>> terms;
+    vector<Token> currentTerm;
+    vector<Token> currentSign;
+
+    for (size_t i = 0; i < tokens.size(); ++i) {
+        const Token& token = tokens[i];
+        if (token.value == "+" || token.value == "-") {
+            if (!currentTerm.empty()) {
+                currentTerm.insert(currentTerm.begin(), currentSign.begin(), currentSign.end());
+                terms.push_back(currentTerm);
+                currentTerm.clear();
+                currentSign.clear();
+            }
+            if (token.value == "-") {
+                currentSign = {Token("u-", true, false, false)};
+            }
+        } else {
+            currentTerm.push_back(token);
+        }
+    }
+
+    if (!currentTerm.empty()) {
+        currentTerm.insert(currentTerm.begin(), currentSign.begin(), currentSign.end());
+        terms.push_back(currentTerm);
+    }
+
+    return terms;
+}
+
+// Integrate a single term
+vector<Token> integrateTerm(const vector<Token>& termPostfix, char var) {
+    stack<double> coeffStack;
+    stack<double> expStack;
+    stack<bool> varStack;
+
+    for (const Token& token : termPostfix) {
+        if (token.isNumber) {
+            coeffStack.push(stod(token.value));
+            expStack.push(0.0);
+            varStack.push(false);
+        } else if (token.isVariable && token.value[0] == var) {
+            coeffStack.push(1.0);
+            expStack.push(1.0);
+            varStack.push(true);
+        } else if (token.value == "u-") {
+            if (coeffStack.empty()) return {Token("0", false, false, true)};
+            double coeff = coeffStack.top(); coeffStack.pop();
+            coeffStack.push(-coeff);
+        } else if (token.value == "u+") {
+            continue;
+        } else if (token.isOperator) {
+            if (coeffStack.size() < 2) return {Token("0", false, false, true)};
+            double c2 = coeffStack.top(); coeffStack.pop();
+            double e2 = expStack.top(); expStack.pop();
+            bool v2 = varStack.top(); varStack.pop();
+            double c1 = coeffStack.top(); coeffStack.pop();
+            double e1 = expStack.top(); expStack.pop();
+            bool v1 = varStack.top(); varStack.pop();
+
+            if (token.value == "*") {
+                coeffStack.push(c1 * c2);
+                expStack.push(e1 + e2);
+                varStack.push(v1 || v2);
+            } else if (token.value == "/") {
+                if (v2) return {Token("0", false, false, true)};
+                coeffStack.push(c1 / c2);
+                expStack.push(e1);
+                varStack.push(v1);
+            } else if (token.value == "^") {
+                if (v1) {
+                    coeffStack.push(c1);
+                    expStack.push(e1 * c2);
+                    varStack.push(true);
+                } else {
+                    coeffStack.push(pow(c1, c2));
+                    expStack.push(0.0);
+                    varStack.push(false);
+                }
+            }
+        }
+    }
+
+    if (coeffStack.empty()) return {Token("0", false, false, true)};
+
+    double coeff = coeffStack.top();
+    double exponent = expStack.top();
+    bool hasVar = varStack.top();
+
+    if (!hasVar) {
+        return {
+            Token(formatNumber(coeff), false, false, true),
+            Token("*", true, false, false),
+            Token(string(1, var), false, true, false)
+        };
+    }
+
+    double newExp = exponent + 1.0;
+    double newCoeff = coeff / newExp;
+    vector<Token> result;
+
+    result.emplace_back(formatNumber(newCoeff), false, false, true);
+    result.emplace_back("*", true, false, false);
+    result.emplace_back(string(1, var), false, true, false);
+
+    if (fabs(newExp - 1.0) > 1e-12) {
+        result.emplace_back("^", true, false, false);
+        result.emplace_back(formatNumber(newExp), false, false, true);
+    }
+
+    return result;
+}
+
+// Integrate full expression
+vector<Token> integrateExpression(const vector<Token>& infixTokens, char var) {
+    vector<vector<Token>> terms = splitInfixTerms(infixTokens);
+    vector<Token> result;
+
+    for (size_t i = 0; i < terms.size(); ++i) {
+        bool isNegative = !terms[i].empty() && terms[i][0].value == "u-";
+        vector<Token> termTokens = terms[i];
+
+        if (isNegative) {
+            termTokens = vector<Token>(terms[i].begin() + 1, terms[i].end());
+        }
+
+        vector<Token> postfix = infixToPostfix(termTokens);
+        vector<Token> integrated = integrateTerm(postfix, var);
+
+        if (integrated.empty()) continue;
+
+        if (isNegative) {
+            result.emplace_back("-", true, false, false);
+        } else if (!result.empty()) {
+            result.emplace_back("+", true, false, false);
+        }
+
+        result.insert(result.end(), integrated.begin(), integrated.end());
+    }
+
+    if (result.empty()) {
+        return {Token("0", false, false, true)};
+    }
+
+    return result;
+}
+
 // Main function with menu
 int main() {
     int choice;
@@ -571,6 +718,7 @@ int main() {
         cout << "\nMenu:\n";
         cout << "1. Evaluate Expression\n";
         cout << "2. Differentiate Expression\n";
+        cout << "3. Integrate Expression\n";
         cout << "0. Exit\n";
         cout << "Enter your choice: ";
         cin >> choice;
@@ -612,6 +760,21 @@ int main() {
             derivative = simplify(derivative);
 
             cout << "Derivative with respect to " << var << ": " << tokensToString(derivative) << endl;
+        } else if (choice == 3) {
+            string expr;
+            char var;
+            cout << "Enter expression: ";
+            cin.ignore();
+            getline(cin, expr);
+            cout << "Enter variable to integrate with respect to: ";
+            cin >> var;
+
+            vector<Token> tokens = tokenize(expr);
+            vector<Token> integral = integrateExpression(tokens, var);
+            vector<Token> postfixIntegral = infixToPostfix(integral);
+            vector<Token> simplifiedIntegral = simplify(postfixIntegral);
+
+            cout << "Integral with respect to " << var << ": " << tokensToString(simplifiedIntegral) << " + C" << endl;
         } else {
             cout << "Invalid choice. Please try again." << endl;
         }
@@ -619,3 +782,5 @@ int main() {
 
     return 0;
 }
+//this is done with expression input ,evaluation, derivative and integration
+//786
